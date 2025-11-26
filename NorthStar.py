@@ -230,39 +230,3 @@ if st.button("🔮 Predict"):
     st.markdown(f"**Probability of SUCCESS:** `{prob:.5f}`")
 
 
-    # SHAP values
-    st.write("---")
-    st.markdown("## 🔍 SHAP Feature Importance")
-
-    explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(preprocess.transform(X))
-
-    fig, ax = plt.subplots(figsize=(7, 5))
-    shap.summary_plot(shap_values, feature_names=model.feature_name_, show=False)
-    st.pyplot(fig)
-
-    # Heatmap 2D
-    st.write("---")
-    st.markdown("## 🔥 Power × Velocity Success Map")
-
-    power_range = np.linspace(50, 500, 30)
-    vel_range = np.linspace(0.2, 3.0, 30)
-
-    grid = []
-    for p in power_range:
-        for v in vel_range:
-            row = X.copy()
-            row["Power [W]"] = p
-            row["Velocity [m/s]"] = v
-            grid.append(row.iloc[0])
-
-    df_grid = pd.DataFrame(grid)
-    probs = pipeline.predict_proba(df_grid)[:, 1]
-    df_grid["prob"] = probs
-
-    pivot = df_grid.pivot_table(index="Velocity [m/s]", columns="Power [W]", values="prob")
-
-    fig, ax = plt.subplots(figsize=(8, 5))
-    c = ax.imshow(pivot, cmap="viridis", origin="lower", aspect="auto")
-    plt.colorbar(c, ax=ax, label="Success Probability")
-    st.pyplot(fig)
